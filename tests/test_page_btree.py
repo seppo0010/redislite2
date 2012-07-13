@@ -32,3 +32,25 @@ class TestPageBTree(TestCase):
         new_page.unserialize(serialized)
         self.assertEqual(new_page.serialize(), serialized)
         self.assertEqual(len(new_page.elements), self.page.max_elements)
+
+    def test_search_ok(self):
+        words = []
+        for i in range(0, self.page.max_elements):
+            w = randomword(self.hlength)
+            words.append(w)
+        words.sort()
+
+        for w in words:
+            element = RedisliteBTreeElement(database=self.database,
+                    hash=w)
+            self.page.elements.append(element)
+
+        for w in words:
+            self.assertIsNot(self.page.search(None, w), None)
+
+        self.assertIs(self.page.search(None, randomword(self.hlength)), None)
+        self.assertIs(self.page.search(None, randomword(self.hlength)), None)
+        self.assertIs(self.page.search(None, randomword(self.hlength)), None)
+
+    def test_search_multipage(self):
+        pass

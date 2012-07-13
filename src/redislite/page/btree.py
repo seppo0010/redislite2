@@ -35,6 +35,23 @@ class RedislitePageBTree(BasePage):
             self.elements.append(tree)
             start += page_len
 
+    def search(self, changeset, hash):
+        start, end = 0, len(self.elements)
+        while start <= end:
+            pos = int(floor((end - start) / 2)) + start
+            el = self.elements[pos]
+            if hash == el.hash:
+                return el
+            elif hash < el.hash:
+                end = pos - 1
+            else:
+                start = pos + 1
+
+        if el and el.left_page:
+            return changeset.read(el.left_page, RedislitePageBTree).search(
+                changeset, hash)
+        return None
+
 
 class RedisliteBTreeElement(object):
     database = None
