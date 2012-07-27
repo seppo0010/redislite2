@@ -188,8 +188,15 @@ codecheck flake8 "${BASEDIR}/src" "${BASEDIR}/tests"
 echo "Working directory: $BASEDIR" >&2
 echo -e "${txtrst}" >&2
 export PYTHONPATH="${BASEDIR}/src"
-if [ $@ == "test" ]; then
-	python -m unittest discover
+if [ "$1" == "test" ]; then
+	shift
+	if [ $@ ]; then
+		python -m unittest $@
+	else
+		python -m unittest discover
+	fi
+elif [ "$1" == "shell" ]; then
+	python
 else
 	"$@"
 fi

@@ -4,8 +4,8 @@ from redislite.page import BasePage
 
 
 class DummyPage(BasePage):
-    def __init__(self, database, data=None):
-        super(DummyPage, self).__init__(database)
+    def __init__(self, database, data=None, page_number=None):
+        super(DummyPage, self).__init__(database, page_number)
         self.data = data
 
     def serialize(self):

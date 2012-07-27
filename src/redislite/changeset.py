@@ -1,17 +1,48 @@
+from math import floor
+
+
 class Changeset(object):
     freelist_item = 0
     number_of_pages = 0
-    read_pages = {}
+    read_pages = []
     pages_to_write = []
 
     def __init__(self, database):
         self.database = database
 
+    def search_page(self, pages, page):
+        start, end = 0, len(pages)
+        if end == 0:
+            return None
+
+        while start < end:
+            pos = int(floor((end - start) / 2)) + start
+            el = pages[pos][0]
+            if page == el:
+                break
+            elif page < el:
+                # update pos in case of a break, we need to return where the
+                # hash should go
+                pos -= 1
+                end = pos
+            else:
+                pos += 1
+                start = pos
+        return pos
+
     def read(self, page_number, klass):
-        data = self.database.storage.read(page_number)
-        obj = klass(self.database)
-        obj.unserialize(data)
-        self.read_pages[page_number] = obj
+        pos = self.search_page(self.pages_to_write, page_number)
+        if pos is None or self.pages_to_write[pos][0] != page_number:
+            data = self.database.storage.read(page_number)
+            obj = klass(self.database, page_number=page_number)
+            obj.unserialize(data)
+            pos = self.search_page(self.read_pages, page_number)
+            if pos is None:
+                self.read_pages.append(obj)
+            else:
+                self.read_pages.insert(pos, obj)
+        else:
+            obj = self.pages_to_write[pos][1]
         return obj
 
     def get_number_of_pages(self):
@@ -33,21 +64,31 @@ class Changeset(object):
 
         return page_number
 
-    def add(self, obj):
-        page_number = self.next_freelist_item()
-        if page_number == 0:
-            page_number = 1
+    def add(self, obj, page_number=None):
+        if page_number is None:
+            page_number = self.next_freelist_item()
+            if page_number == 0:
+                page_number = 1
+            obj.page_number = page_number
 
         self.write(page_number, obj)
         return page_number
 
     def write(self, page_number, obj):
-        self.pages_to_write.append((page_number, obj.serialize()))
+        pos = self.search_page(self.pages_to_write, page_number)
+        if pos is None:
+            self.pages_to_write.append((page_number, obj))
+        elif (len(self.pages_to_write) > pos and
+                self.pages_to_write[pos][0] == page_number):
+            self.pages_to_write[pos] = (page_number, obj)
+        else:
+            self.pages_to_write.insert(pos, (page_number, obj))
 
     def close(self):
         self.database.freelist_item = self.freelist_item
         self.database.number_of_pages = self.number_of_pages
         # TODO: update db info page
-        self.database.storage.write(self.pages_to_write)
+        self.database.storage.write([(n, p.serialize()) for n, p in
+                self.pages_to_write])
         self.pages_to_write = []
-        self.read_pages = {}
+        self.read_pages = []

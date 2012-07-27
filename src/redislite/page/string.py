@@ -9,8 +9,9 @@ class StringPageIndex(BasePage):
     next_page = 0
     data = None
 
-    def __init__(self, database, data=None, next_page=0, total_length=0):
-        super(StringPageIndex, self).__init__(database)
+    def __init__(self, database, data=None, next_page=0, total_length=0, *args,
+            **kwargs):
+        super(StringPageIndex, self).__init__(database, *args, **kwargs)
         self.data = data
         self.next_page = next_page
         self.total_length = total_length

@@ -13,8 +13,8 @@ class DbinfoPage(BasePage):
     freelist_item = None
 
     def __init__(self, database, btree=None, hasher=None, page_size=None,
-            number_of_pages=None, freelist_item=None):
-        super(DbinfoPage, self).__init__(database)
+            number_of_pages=None, freelist_item=None, *args, **kwargs):
+        super(DbinfoPage, self).__init__(database, *args, **kwargs)
         self.btree = btree or 0
         self.hasher = hasher or 'c'
         self.page_size = page_size or 0

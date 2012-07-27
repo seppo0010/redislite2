@@ -6,8 +6,8 @@ from . import BasePage
 class FreelistPage(BasePage):
     next_page = 0
 
-    def __init__(self, database, next_page=0):
-        super(FreelistPage, self).__init__(database)
+    def __init__(self, database, next_page=0, *args, **kwargs):
+        super(FreelistPage, self).__init__(database, *args, **kwargs)
         self.next_page = next_page
 
     def serialize(self):

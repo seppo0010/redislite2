@@ -2,9 +2,10 @@ from . import BaseStorage
 
 
 class Storage(BaseStorage):
-    pages = {}
+    pages = None
 
     def __init__(self, identifier, database):
+        self.pages = {}
         self.identifier = identifier
         self.database = database
         self.database.storage = self
