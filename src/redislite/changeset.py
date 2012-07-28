@@ -1,5 +1,7 @@
 from math import floor
 
+from redislite.page.freelist import FreelistPage
+
 
 class Changeset(object):
     freelist_item = 0
@@ -86,6 +88,10 @@ class Changeset(object):
 
         self.write(page_number, obj)
         return page_number
+
+    def remove(self, page_number):
+        page = FreelistPage(self.database, self.next_freelist_item())
+        self.write(page_number, page)
 
     def write(self, page_number, obj):
         pos = self.search_page(self.pages_to_write, page_number)

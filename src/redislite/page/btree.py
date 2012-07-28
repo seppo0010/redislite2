@@ -77,6 +77,10 @@ class RedislitePageBTree(BasePage):
             return page.search(changeset, hash)
 
         el = self.elements[location]
+        # Used as a branch, but has no data associated
+        if el.page_number == 0:
+            return None, self
+
         if el.hash == hash:
             return el, self
 
@@ -127,6 +131,28 @@ class RedislitePageBTree(BasePage):
                     return page.add_element(changeset, element)
             self.elements.insert(location, element)
         self.check_maximum(changeset)
+
+    def remove_hash(self, changeset, hash):
+        element, page = self.search(changeset, hash)
+        if element is None:
+            return False
+        should_add = True
+
+        if element.left_page > 0:
+            element.page_number = 0
+        else:
+            page.elements.remove(element)
+            if len(page.elements) == 0:
+                changeset.remove(page)
+                should_add = False
+                if page.parent is not None:
+                    for e in page.parent.elements:
+                        if e.left_page == page.page_number:
+                            e.left_page = 0
+                            break
+
+        if should_add:
+            changeset.add(page, page_number=page.page_number)
 
     def insert(self, changeset, new_element, force_insert=False):
         element, page = self.search(changeset, new_element.hash)

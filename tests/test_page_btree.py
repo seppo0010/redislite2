@@ -165,3 +165,18 @@ class TestPageBTree(TestCase):
         for i in range(0, self.page.max_elements * 10):
             w = randomword(self.hlength)
             self.assertIs(self.page.search(self.changeset, w)[0], None)
+
+    def test_delete(self):
+        words = set()
+        for i in range(0, self.page.max_elements * 10):
+            w = randomword(self.hlength)
+            words.add(w)
+            element = RedisliteBTreeElement(database=self.database, hash=w,
+                    page_number=1)
+            self.page.add_element(self.changeset, element)
+
+        for w in words:
+            self.page.remove_hash(self.changeset, w)
+
+        for w in words:
+            self.assertIs(self.page.search(self.changeset, w)[0], None)
