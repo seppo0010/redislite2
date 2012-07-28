@@ -15,25 +15,54 @@ class TestChangeset(TestCase):
 
     def test_get_page(self):
         data = {}
-        for i in range(0, 1):
+        for i in range(0, 2):
             word = randomword(512)
             self.storage.write(((i, word), ))
             data[i] = word
 
-        for i in range(0, 1):
+        for i in range(0, 2):
             page = self.changeset.read(i, DummyPage)
             self.assertEqual(page.data, data[i])
 
+    def test_get_page_reversed(self):
+        data = {}
+        for i in range(0, 2):
+            word = randomword(512)
+            self.storage.write(((i, word), ))
+            data[i] = word
+
+        self.changeset.close()
+
+        for i in reversed(range(0, 2)):
+            page = self.changeset.read(i, DummyPage)
+            self.assertEqual(page.data, data[i])
+
+    def test_get_page_twice(self):
+        data = {}
+        for i in range(0, 2):
+            word = randomword(512)
+            self.storage.write(((i, word), ))
+            data[i] = word
+
+        self.changeset.close()
+
+        pages = []
+        for i in range(0, 2):
+            pages.append(self.changeset.read(i, DummyPage))
+
+        for i in range(0, 2):
+            self.assertIs(self.changeset.read(i, DummyPage), pages[i])
+
     def test_write_page(self):
         data = {}
-        for i in range(0, 1):
+        for i in range(0, 2):
             word = randomword(512)
             self.changeset.write(i, DummyPage(self.database, word))
             data[i] = word
 
         self.changeset.close()
 
-        for i in range(0, 1):
+        for i in range(0, 2):
             page = self.storage.read(i)
             self.assertEqual(page, data[i])
 

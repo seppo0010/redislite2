@@ -21,7 +21,5 @@ class Storage(BaseStorage):
                 self.fp.seek(n * self.database.page_size)
                 self.fp.write(data)
             self.fp.flush()
-        except Exception, e:
-            raise e
         finally:
             fcntl.flock(self.fp, fcntl.LOCK_UN)

@@ -4,11 +4,13 @@ from math import floor
 class Changeset(object):
     freelist_item = 0
     number_of_pages = 0
-    read_pages = []
-    pages_to_write = []
+    read_pages = None
+    pages_to_write = None
 
     def __init__(self, database):
         self.database = database
+        self.read_pages = []
+        self.pages_to_write = []
 
     def search_page(self, pages, page):
         start, end = 0, len(pages)
@@ -28,19 +30,30 @@ class Changeset(object):
             else:
                 pos += 1
                 start = pos
+
+        # Possible off-by-one. Since we are approaching from both sides we
+        # could be left one position to the left of the desired position.
+        if pos < len(pages) and pages[pos][0] < page:
+            pos += 1
+        if pos < 0:
+            pos = 0
         return pos
 
     def read(self, page_number, klass):
         pos = self.search_page(self.pages_to_write, page_number)
         if pos is None or self.pages_to_write[pos][0] != page_number:
-            data = self.database.storage.read(page_number)
-            obj = klass(self.database, page_number=page_number)
-            obj.unserialize(data)
             pos = self.search_page(self.read_pages, page_number)
-            if pos is None:
-                self.read_pages.append(obj)
+            if (pos is not None and len(self.read_pages) > pos and
+                    self.read_pages[pos][0] == page_number):
+                obj = self.read_pages[pos][1]
             else:
-                self.read_pages.insert(pos, obj)
+                data = self.database.storage.read(page_number)
+                obj = klass(self.database, page_number=page_number)
+                obj.unserialize(data)
+                if pos is None:
+                    self.read_pages.append((page_number, obj))
+                else:
+                    self.read_pages.insert(pos, (page_number, obj))
         else:
             obj = self.pages_to_write[pos][1]
         return obj

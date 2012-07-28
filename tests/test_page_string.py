@@ -42,13 +42,14 @@ class TestPageString(TestCase):
                 (100, 0, word))
 
     def test_create_multi_page(self):
-        word = randomword(1000)
+        length = 2000
+        word = randomword(length)
         page_number = StringPageIndex.create(self.database, self.changeset,
                 word)
         self.changeset.close()
         page = StringPageIndex(self.database)
         page.unserialize(self.storage.read(page_number))
-        self.assertEqual((page.total_length, page.next_page), (1000, 1))
+        self.assertEqual(page.total_length, length)
 
         data = page.data
         next_page = page.next_page

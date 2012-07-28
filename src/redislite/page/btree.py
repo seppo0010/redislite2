@@ -99,7 +99,6 @@ class RedislitePageBTree(BasePage):
                         parent=parent, database=self.database)
                 self.elements = right_half
                 el.left_page = changeset.add(sibling)
-                changeset.add(self, page_number=self.page_number)
                 parent.add_element(changeset, el, force_page=True)
             else:
                 children = (RedislitePageBTree(elements=left_half,
@@ -110,7 +109,6 @@ class RedislitePageBTree(BasePage):
                 self.elements = [el]
                 el.left_page = pages[0]
                 self.right_page = pages[1]
-                changeset.add(self, page_number=self.page_number)
 
     def add_element(self, changeset, element, force_page=False):
         location = self.hash_location(element.hash)
@@ -130,15 +128,18 @@ class RedislitePageBTree(BasePage):
             self.elements.insert(location, element)
         self.check_maximum(changeset)
 
-    def insert(self, changeset, element, force_insert=False):
-        element, page = self.search(changeset, element.hash)
+    def insert(self, changeset, new_element, force_insert=False):
+        element, page = self.search(changeset, new_element.hash)
         if element is not None:
             if force_insert:
                 return False
             pos = page.elements.index(element)
-            page.elements[pos] = element
+            assert page.elements[pos].hash == new_element.hash
+            new_element.left_page = page.elements[pos].left_page
+            page.elements[pos] = new_element
         else:
-            page.add_element(changeset, element)
+            page.add_element(changeset, new_element)
+        changeset.add(self, page_number=self.page_number)
         return True
 
 

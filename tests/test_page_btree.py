@@ -45,6 +45,10 @@ class TestPageBTree(TestCase):
         self.assertEqual(new_page.serialize(), serialized)
         self.assertEqual(len(new_page.elements), self.page.max_elements)
 
+    def test_search_empty(self):
+        self.assertIs(self.page.search(None, randomword(self.hlength))[0],
+                None)
+
     def test_search_ok(self):
         words = []
         for i in range(0, self.page.max_elements):
@@ -94,7 +98,7 @@ class TestPageBTree(TestCase):
                 words.append(w)
                 element = RedisliteBTreeElement(database=self.database, hash=w,
                         page_number=1)
-                self.page.add_element(self.changeset, element)
+                self.page.insert(self.changeset, element)
 
             for w in words:
                 self.assertIsNot(self.page.search(self.changeset, w)[0], None)
@@ -102,10 +106,49 @@ class TestPageBTree(TestCase):
             self.assertEqual(4, len([item for item in
                         self.changeset.pages_to_write
                         if item[1].__class__ == RedislitePageBTree]))
-        except:
-            raise
         finally:
             RedislitePageBTree.max_elements = old_max_elements
+
+    def test_update(self):
+        words = set()
+        for i in range(0, self.page.max_elements * 2):
+            w = randomword(self.hlength)
+            words.add(w)
+
+        for w in words:
+            element = RedisliteBTreeElement(database=self.database, hash=w,
+                    page_number=1)
+            self.page.insert(self.changeset, element)
+
+        for w in words:
+            element = RedisliteBTreeElement(database=self.database, hash=w,
+                    page_number=2)
+            self.page.insert(self.changeset, element)
+
+        for w in words:
+            self.assertEqual(self.page.search(self.changeset, w
+                        )[0].page_number, 2)
+
+    def test_force_insert(self):
+        words = set()
+        for i in range(0, self.page.max_elements * 2):
+            w = randomword(self.hlength)
+            words.add(w)
+
+        for w in words:
+            element = RedisliteBTreeElement(database=self.database, hash=w,
+                    page_number=1)
+            self.page.insert(self.changeset, element)
+
+        for w in words:
+            element = RedisliteBTreeElement(database=self.database, hash=w,
+                    page_number=2)
+            self.assertFalse(self.page.insert(self.changeset, element,
+                        force_insert=True))
+
+        for w in words:
+            self.assertEqual(self.page.search(self.changeset, w
+                        )[0].page_number, 1)
 
     def test_insert_multipage_fuzzy(self):
         words = set()
