@@ -1,0 +1,9 @@
+Redislite was born with the idea of making a software library that implements a
+self-contained, serverless, zero-configuration, redis-compatible database
+engine.
+
+After some effort, I realized that the implementation I started was inviable,
+with structural errors. Since the vision is still there, this is a Python
+implementation of the project. The language was choosen to facilitate
+development, refactoring with the goal of realize the algorithms and then
+implement as a library in pure C.
