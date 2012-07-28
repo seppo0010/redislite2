@@ -152,7 +152,7 @@ class RedislitePageBTree(BasePage):
                             break
 
         if should_add:
-            changeset.add(page, page_number=page.page_number)
+            changeset.add(page)
 
     def insert(self, changeset, new_element, force_insert=False):
         element, page = self.search(changeset, new_element.hash)
@@ -165,7 +165,7 @@ class RedislitePageBTree(BasePage):
             page.elements[pos] = new_element
         else:
             page.add_element(changeset, new_element)
-        changeset.add(self, page_number=self.page_number)
+        changeset.add(self)
         return True
 
 

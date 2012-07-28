@@ -79,7 +79,8 @@ class Changeset(object):
 
         return page_number
 
-    def add(self, obj, page_number=None):
+    def add(self, obj):
+        page_number = obj.page_number
         if page_number is None:
             page_number = self.next_freelist_item()
             if page_number == 0:
