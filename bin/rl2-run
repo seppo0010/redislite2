@@ -191,10 +191,11 @@ export PYTHONPATH="${BASEDIR}/src"
 if [ "$1" == "test" ]; then
 	shift
 	if [ $@ ]; then
-		python -m unittest $@
+		coverage run -m unittest $@
 	else
-		python -m unittest discover
+		coverage run -m unittest discover
 	fi
+	coverage html
 elif [ "$1" == "shell" ]; then
 	python
 else
