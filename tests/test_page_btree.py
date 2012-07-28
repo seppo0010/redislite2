@@ -9,16 +9,14 @@ from redislite.page.btree import RedislitePageBTree, RedisliteBTreeElement
 from . import randomword, DummyPage
 
 
-def print_page_recursive(page, changeset):
-    print (page.page_number, [e.__dict__ for e in page.elements],
-            page.right_page)
-    for e in page.elements:
-        if e.left_page:
-            print_page_recursive(changeset.read(e.left_page,
-                        RedislitePageBTree), changeset)
-    if page.right_page:
-        print_page_recursive(changeset.read(page.right_page,
-                    RedislitePageBTree), changeset)
+def print_page_recursive(page, changeset):  # pragma: no cover
+    print (page.page_number, [e.__dict__ for e in page.elements],  # pragma: no cover # NOQA
+            page.right_page)  # pragma: no cover
+    for e in page.elements:  # pragma: no cover
+        if e.left_page:  # pragma: no cover
+            print_page_recursive(changeset.read(e.left_page, RedislitePageBTree), changeset)  # pragma: no cover # NOQA
+    if page.right_page:  # pragma: no cover
+        print_page_recursive(changeset.read(page.right_page, RedislitePageBTree), changeset)  # pragma: no cover # NOQA
 
 
 class TestPageBTree(TestCase):

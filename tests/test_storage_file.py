@@ -18,8 +18,8 @@ class TestStorageFile(TestCase):
     def tearDown(self):
         try:
             os.unlink(self.filename)
-        except os.OSError:
-            pass
+        except os.OSError:  # pragma: no cover
+            pass  # pragma: no cover
 
     def test_read(self):
         data = randomword(1024)
