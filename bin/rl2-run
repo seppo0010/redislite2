@@ -195,6 +195,7 @@ if [ "$1" == "test" ]; then
 	else
 		coverage run -m unittest discover
 	fi
+	coverage report
 	coverage html
 elif [ "$1" == "shell" ]; then
 	python
