@@ -7,7 +7,7 @@ from . import BasePage
 class RedislitePageList(BasePage):
     left_page = None
     right_page = None
-    rlements = None
+    elements = None
     root = None
 
     def __init__(self, elements=None, right_page=None, left_page=None,
