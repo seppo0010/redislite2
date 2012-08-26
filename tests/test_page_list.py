@@ -1,4 +1,5 @@
 from unittest import TestCase
+from random import seed, randint
 
 from redislite.db import DB
 from redislite.changeset import Changeset
@@ -85,6 +86,30 @@ class TestPageList(TestCase):
                     hash=w, page_number=i)
             self.page.rpush(self.changeset, element)
             words.append(w)
+
+        page = self.page
+        start = 0
+        for i in range(0, m):
+            self.assertEqual(words[i], page.elements[i - start].hash)
+            if i - start + 1 == len(page.elements) and i < m - 1:
+                start = i + 1
+                page = self.changeset.read(page.right_page, RedislitePageList)
+
+    def test_rpush_lpush(self):
+        seed(0)
+        words = []
+        m = self.page.max_elements * 3
+
+        for i in range(0, m):
+            w = randomword(self.hlength)
+            element = RedisliteListElement(database=self.database,
+                    hash=w, page_number=i)
+            if randint(0, 1) == 0:
+                self.page.rpush(self.changeset, element)
+                words.append(w)
+            else:
+                self.page.lpush(self.changeset, element)
+                words.insert(0, w)
 
         page = self.page
         start = 0
