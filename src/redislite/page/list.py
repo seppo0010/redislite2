@@ -109,6 +109,20 @@ class RedislitePageListRoot(RedislitePageList):
             self.check_maximum(changeset)
             changeset.add(self)
 
+    def search(self, changeset, hash):
+        page = self
+        offset = 0
+        while 1:
+            for e in page.elements:
+                if e.hash == hash:
+                    return offset + page.elements.index(e)
+            offset += len(page.elements)
+            if page.right_page > 0:
+                page = changeset.read(page.right_page, RedislitePageList)
+            else:
+                break
+        return -1
+
 
 class RedisliteListElement(object):
     database = None

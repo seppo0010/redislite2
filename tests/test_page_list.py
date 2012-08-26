@@ -118,3 +118,19 @@ class TestPageList(TestCase):
             if i - start + 1 == len(page.elements) and i < m - 1:
                 start = i + 1
                 page = self.changeset.read(page.right_page, RedislitePageList)
+
+    def test_search(self):
+        words = []
+        m = self.page.max_elements * 3
+        for i in range(0, m):
+            w = randomword(self.hlength)
+            element = RedisliteListElement(database=self.database,
+                    hash=w, page_number=i)
+            self.page.rpush(self.changeset, element)
+            words.append(w)
+
+        page = self.page
+        for i in range(0, m):
+            self.assertEqual(page.search(self.changeset, words[i]), i)
+        self.assertEqual(page.search(self.changeset, randomword(self.hlength)),
+                -1)
